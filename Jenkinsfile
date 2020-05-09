@@ -37,11 +37,18 @@ pipeline {
     
        stage ('Deploy-To-Tomcat') {
             steps {
-           sshagent(['tomcat']) {
+           sshagent(['tomcat']) 
+		   {
                 sh 'scp -o StrictHostKeyChecking=no target/*.war root@192.168.127.193:/prod/apache-tomcat-8.5.54/webapps/webapp.war'
               }      
-           }       
+           }
+	       
     }
+	  stage ('DAST') {
+      steps {
+        sshagent(['zap']) {
+         sh 'ssh -o  StrictHostKeyChecking=no madan@192.168.126.32 " zaproxy -daemon -quickurl http://192.168.127.193:8080/webapp/" || true'
+        }
 
   }
 }
